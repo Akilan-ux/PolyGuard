@@ -120,16 +120,24 @@
             <h3>Registration</h3>
             <p style="color:var(--medium-gray)">Sign up with your business details (1-2 working days for verification).</p>
             <form id="registerForm">
-                <div class="form-row">
-                    <input name="fullName" placeholder="Full name" required />
-                    <input name="company" placeholder="Company" />
+                <div style="margin-bottom:14px;">
+                    <label style="display:inline-block; width:120px; font-weight:500; color:var(--dark-gray);">Full Name:</label>
+                    <input type="email" name="fullName" style="width:300px;" required />
                 </div>
-                <div class="form-row">
-                    <input type="email" name="email" placeholder="Work email" required />
-                    <input name="phone" placeholder="Phone (optional)" />
+                <div style="margin-bottom:14px;">
+                    <label style="display:inline-block; width:120px; font-weight:500; color:var(--dark-gray);">Company:</label>
+                    <input type="email" name="company" style="width:300px;" />
+                </div>
+                <div style="margin-bottom:14px;">
+                    <label style="display:inline-block; width:120px; font-weight:500; color:var(--dark-gray);">Work Email:</label>
+                    <input type="email" name="email" style="width:300px;" required />
+                </div>
+                <div style="margin-bottom:14px;">
+                    <label style="display:inline-block; width:120px; font-weight:500; color:var(--dark-gray);">Phone:</label>
+                    <input type="email" name="phone" style="width:300px;" placeholder="(optional)" />
                 </div>
                 
-                <div style="display:flex; gap:12px;">
+                <div style="display:flex; gap:12px; margin-top:20px;">
                     <button type="submit" class="btn btn-primary">Generate Hash ID</button>
                     <button type="button" id="regReset" class="btn btn-tier-secondary">Reset</button>
                 </div>
@@ -140,8 +148,9 @@
         <section id="panel-auth" role="tabpanel" aria-labelledby="tab-auth" class="tab-panel">
             <h3>Authentication</h3>
             <p style="color:var(--medium-gray)">QR authentication and blockchain verification.</p>
-            <div class="form-row">
-                <input id="qrInput" placeholder="Paste QR payload / code string" class="full" />
+            <div style="margin-bottom:14px;">
+                <label style="display:inline-block; width:120px; font-weight:500; color:var(--dark-gray);">QR Payload:</label>
+                <input type="email" id="qrInput" style="width:300px;" placeholder="Paste QR payload or code" />
             </div>
             <div style="display:flex; gap:12px; margin-top:8px;">
                 <button id="authBtn" class="btn btn-primary">Authenticate QR</button>
@@ -153,8 +162,9 @@
         <section id="panel-proof" role="tabpanel" aria-labelledby="tab-proof" class="tab-panel">
             <h3>Transaction History</h3>
             <p style="color:var(--medium-gray)">Enter a transaction ID to verify an immutable proof on-chain (Ethereum).</p>
-            <div class="form-row">
-                <input id="txId" placeholder="Transaction ID (e.g. tx_0x123abc...)" class="full" />
+            <div style="margin-bottom:14px;">
+                <label style="display:inline-block; width:120px; font-weight:500; color:var(--dark-gray);">Transaction ID:</label>
+                <input type="email" id="txId" style="width:300px;" placeholder="e.g. tx_0x123abc..." />
             </div>
             <div style="display:flex; gap:12px; margin-top:8px;">
                 <button id="proofBtn" class="btn btn-primary">Verify Transaction</button>
