@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PolyGuard Demo — Registration, Authentication, Proof of Transaction</title>
+    <link rel="stylesheet" href="main.css">
+    <style>
+        /* Small overrides for demo page */
+        .demo-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 24px;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        }
+
+        .demo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid var(--border-gray);
+            padding-bottom: 12px;
+            margin-bottom: 18px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            padding: 10px 16px;
+            border-radius: 8px 8px 0 0;
+            border: 1px solid transparent;
+            font-weight: 600;
+            color: var(--dark-gray);
+        }
+
+        .tab-btn[aria-selected="true"] {
+            background: var(--white);
+            border-color: var(--border-gray);
+            border-bottom-color: var(--white);
+            color: var(--primary-blue);
+            box-shadow: 0 -3px 12px rgba(0,82,204,0.08);
+        }
+
+        .tab-panel {
+            display: none;
+            padding: 18px 6px;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .form-row .full {
+            grid-column: 1 / -1;
+        }
+
+        input[type="text"], input[type="email"], textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--border-gray);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .result-box {
+            padding: 14px;
+            border-radius: 8px;
+            background: var(--light-gray);
+            border: 1px solid var(--border-gray);
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        .back-link { color: var(--medium-gray); font-size: 14px; }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-container container">
+            <div class="navbar-brand"><h1>PolyGuard</h1></div>
+            <nav class="navbar-menu">
+                <a href="main.html" class="nav-link back-link">← Back to Home</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="demo-container">
+        <div class="demo-header">
+            <div>
+                <h2 style="margin-bottom:6px;">PolyGuard Interactive Demo</h2>
+                <p style="margin:0; color:var(--medium-gray);">Try out registration, authentication, and transaction proofs.</p>
+            </div>
+            <div>
+                <a class="nav-demo-btn btn-tier-secondary" href="#">Request Live Demo</a>
+            </div>
+        </div>
+
+        <div role="tablist" aria-label="Demo Tabs" class="tabs" id="demoTabs">
+            <button role="tab" aria-selected="true" aria-controls="panel-register" id="tab-register" class="tab-btn">Registration</button>
+            <button role="tab" aria-selected="false" aria-controls="panel-auth" id="tab-auth" class="tab-btn">Authentication</button>
+            <button role="tab" aria-selected="false" aria-controls="panel-proof" id="tab-proof" class="tab-btn">Proof of Transaction</button>
+        </div>
+
+        <section id="panel-register" role="tabpanel" aria-labelledby="tab-register" class="tab-panel active">
+            <h3>Registration</h3>
+            <p style="color:var(--medium-gray)">Sign up with your business details (1-2 working days for verification).</p>
+            <form id="registerForm">
+                <div class="form-row">
+                    <input name="fullName" placeholder="Full name" required />
+                    <input name="company" placeholder="Company" />
+                </div>
+                <div class="form-row">
+                    <input type="email" name="email" placeholder="Work email" required />
+                    <input name="phone" placeholder="Phone (optional)" />
+                </div>
+                
+                <div style="display:flex; gap:12px;">
+                    <button type="submit" class="btn btn-primary">Generate Hash ID</button>
+                    <button type="button" id="regReset" class="btn btn-tier-secondary">Reset</button>
+                </div>
+                <div id="regResult" class="result-box" style="display:none"></div>
+            </form>
+        </section>
+
+        <section id="panel-auth" role="tabpanel" aria-labelledby="tab-auth" class="tab-panel">
+            <h3>Authentication</h3>
+            <p style="color:var(--medium-gray)">QR authentication and blockchain verification.</p>
+            <div class="form-row">
+                <input id="qrInput" placeholder="Paste QR payload / code string" class="full" />
+            </div>
+            <div style="display:flex; gap:12px; margin-top:8px;">
+                <button id="authBtn" class="btn btn-primary">Authenticate QR</button>
+                <button id="authSimBtn" class="btn btn-tier-secondary">Failed Auth</button>
+            </div>
+            <div id="authResult" class="result-box" style="display:none"></div>
+        </section>
+
+        <section id="panel-proof" role="tabpanel" aria-labelledby="tab-proof" class="tab-panel">
+            <h3>Transaction History</h3>
+            <p style="color:var(--medium-gray)">Enter a transaction ID to verify an immutable proof on-chain (Ethereum).</p>
+            <div class="form-row">
+                <input id="txId" placeholder="Transaction ID (e.g. tx_0x123abc...)" class="full" />
+            </div>
+            <div style="display:flex; gap:12px; margin-top:8px;">
+                <button id="proofBtn" class="btn btn-primary">Verify Transaction</button>
+                <button id="proofSample" class="btn btn-tier-secondary">Use Sample TX</button>
+            </div>
+            <div id="proofResult" class="result-box" style="display:none"></div>
+        </section>
+
+    </main>
+
+    <script>
+        // Tab switching logic
+        (function() {
+            const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+            const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
+
+            function activateTab(tab) {
+                tabs.forEach(t => t.setAttribute('aria-selected', 'false'));
+                tab.setAttribute('aria-selected', 'true');
+                panels.forEach(p => p.classList.remove('active'));
+                const panel = document.getElementById(tab.getAttribute('aria-controls'));
+                if (panel) panel.classList.add('active');
+                tab.focus();
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => activateTab(tab));
+                tab.addEventListener('keydown', (e) => {
+                    const i = tabs.indexOf(tab);
+                    if (e.key === 'ArrowRight') activateTab(tabs[(i + 1) % tabs.length]);
+                    if (e.key === 'ArrowLeft') activateTab(tabs[(i - 1 + tabs.length) % tabs.length]);
+                });
+            });
+        })();
+
+        // Registration form - send company name as product_id to local hash API
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const data = new FormData(e.target);
+            const name = data.get('fullName');
+            const email = data.get('email');
+            const company = (data.get('company') || '').trim();
+            const result = document.getElementById('regResult');
+            result.style.display = 'block';
+
+            if (!company) {
+                result.innerHTML = '<strong>Error:</strong> Company name is required to generate product id.';
+                result.style.borderColor = 'var(--red)';
+                return;
+            }
+
+            // POST to local hash API. Make sure `hash.py` server is running (see instructions below).
+            try {
+                const res = await fetch('/hash', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: company })
+                });
+
+                if (!res.ok) throw new Error('Network response was not ok');
+                const json = await res.json();
+                const sha = json.sha256;
+                result.style.borderColor = 'var(--green)';
+                result.innerHTML = `<strong>Success:</strong> Hash QR code created for <strong>${escapeHtml(name)}</strong> (${escapeHtml(email)}).<br>Product ID (company): <code>${escapeHtml(company)}</code><br>SHA-256: <code>${sha}</code>`;
+                        // Show deploy subsection asking whether to deploy to private blockchain
+                        showDeploySubsection(sha);
+            } catch (err) {
+                result.style.borderColor = 'var(--red)';
+                result.innerHTML = `<strong>Error:</strong> Could not reach local hash API. Make sure the server is running</strong>`;
+            }
+        });
+
+        document.getElementById('regReset').addEventListener('click', function() {
+            document.getElementById('registerForm').reset();
+            const result = document.getElementById('regResult');
+            result.style.display = 'none';
+            result.innerHTML = '';
+        })
+
+        // Authentication simulation
+        document.getElementById('authBtn').addEventListener('click', function() {
+            const payload = document.getElementById('qrInput').value.trim();
+            const r = document.getElementById('authResult');
+            r.style.display = 'block';
+            if (!payload) {
+                r.innerHTML = '<strong>Error:</strong> No QR payload provided.';
+                return;
+            }
+            // Fake verification
+            const ok = Math.random() > 0.12; // mostly succeed
+            if (ok) {
+                r.innerHTML = `<strong>Authenticated:</strong> QR payload verified. Proof hash: <code>0x${Math.random().toString(16).slice(2,18)}</code>`;
+                r.style.borderColor = 'var(--green)';
+            } else {
+                r.innerHTML = '<strong>Failed:</strong> QR payload could not be verified.';
+                r.style.borderColor = 'var(--red)';
+            }
+        });
+
+        document.getElementById('authSimBtn').addEventListener('click', function() {
+            const r = document.getElementById('authResult');
+            r.style.display = 'block';
+            r.innerHTML = '<strong>Failed:</strong> Simulated authentication failure.';
+            r.style.borderColor = 'var(--red)';
+        });
+
+        // Proof of Transaction simulation
+        document.getElementById('proofBtn').addEventListener('click', function() {
+            const tx = document.getElementById('txId').value.trim();
+            const r = document.getElementById('proofResult');
+            r.style.display = 'block';
+            if (!tx) { r.innerHTML = '<strong>Error:</strong> Transaction ID required.'; r.style.borderColor = 'var(--red)'; return; }
+            // Simulate lookup
+            const exists = Math.random() > 0.08;
+            if (exists) {
+                r.innerHTML = `<strong>Verified:</strong> Transaction <code>${escapeHtml(tx)}</code> was recorded on-chain. Merkle proof: <code>0x${Math.random().toString(16).slice(2,20)}</code>`;
+                r.style.borderColor = 'var(--green)';
+            } else {
+                r.innerHTML = `<strong>Not found:</strong> No immutable proof found for <code>${escapeHtml(tx)}</code>.`;
+                r.style.borderColor = 'var(--red)';
+            }
+        });
+
+        document.getElementById('proofSample').addEventListener('click', function() {
+            document.getElementById('txId').value = 'tx_demo_0x' + Math.random().toString(16).slice(2,12);
+            document.getElementById('proofBtn').click();
+        });
+
+        // small helper to escape HTML
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>"']/g, function (m) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#039;"})[m]; });
+        }
+        // --- Deploy subsection logic ---
+        function showDeploySubsection(sha) {
+            // Remove existing if present
+            let el = document.getElementById('deploySub');
+            if (el) el.remove();
+
+            const container = document.createElement('div');
+            container.id = 'deploySub';
+            container.style.marginTop = '18px';
+            container.innerHTML = `
+                <h4>Deploy Hash to Private Blockchain?</h4>
+                <p style="color:var(--medium-gray)">Would you like to deploy this product hash to a local private blockchain for verification and proof? This will require running a local Hardhat node (no real gas fees) and deploying a small registry contract. If you choose <strong>Yes</strong>, follow the quick commands provided below.</p>
+                <div style="display:flex; gap:12px; margin-bottom:12px;">
+                    <button id="deployYes" class="btn btn-primary">Yes — show commands</button>
+                    <button id="deployNo" class="btn btn-tier-secondary">No, thanks</button>
+                </div>
+                <div id="deployInstructions" style="display:none; margin-top:12px; background:var(--light-gray); padding:12px; border-radius:8px; border:1px solid var(--border-gray);">
+                    <p style="margin:0 0 8px 0;"><strong>Quick start:</strong></p>
+                    <ol style="margin:0 0 12px 20px; color:var(--medium-gray)">
+                        <li>Install Node dependencies: <code>npm install</code></li>
+                        <li>Start local Hardhat node (opens JSON-RPC at <code>127.0.0.1:8545</code>): <code>npx hardhat node</code></li>
+                        <li>Deploy contract and register the hash (replace <code>HASH</code> below with the value):</li>
+                    </ol>
+                    <pre style="background:#fff; padding:10px; border-radius:6px; border:1px solid var(--border-gray); overflow:auto;"><code id="deployCmd"># Example:
+npm install
+npx hardhat node
+# In another terminal:
+node scripts/register_call.js ${sha}
+</code></pre>
+                    <div style="margin-top:8px; display:flex; gap:8px;">
+                        <button id="copyCmd" class="btn btn-secondary">Copy commands</button>
+                        <a id="openReadme" href="README-HARDHAT.md" class="btn btn-tier-secondary">Open README</a>
+                        <button id="deployNow" class="btn btn-primary">Deploy Now (via API)</button>
+                    </div>
+                    <p style="margin-top:8px; color:var(--medium-gray); font-size:13px;">Note: The Hardhat node is configured for zero gas price locally. These commands run on your machine only.</p>
+                </div>
+            `;
+
+            const parent = document.getElementById('registerForm');
+            parent.parentNode.insertBefore(container, parent.nextSibling);
+
+            document.getElementById('deployYes').addEventListener('click', () => {
+                document.getElementById('deployInstructions').style.display = 'block';
+            });
+            document.getElementById('deployNo').addEventListener('click', () => {
+                container.remove();
+            });
+            document.getElementById('copyCmd').addEventListener('click', async () => {
+                const text = document.getElementById('deployCmd').innerText;
+                try { await navigator.clipboard.writeText(text); alert('Commands copied to clipboard'); } catch(e) { alert('Copy not available: ' + e.message); }
+            });
+            document.getElementById('deployNow').addEventListener('click', async () => {
+                const btn = document.getElementById('deployNow');
+                btn.disabled = true;
+                btn.textContent = 'Deploying...';
+                const statusBox = document.createElement('div');
+                statusBox.className = 'result-box';
+                statusBox.style.display = 'block';
+                statusBox.innerText = 'Deploying to local network via API...';
+                container.appendChild(statusBox);
+
+                try {
+                    const resp = await fetch('/deploy', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ hash: sha })
+                    });
+                    const json = await resp.json();
+                    if (!resp.ok) {
+                        statusBox.innerHTML = `<strong>Error:</strong> ${escapeHtml(json.error || JSON.stringify(json))}`;
+                        btn.disabled = false;
+                        btn.textContent = 'Deploy Now (via API)';
+                        return;
+                    }
+
+                    statusBox.innerHTML = `<strong>Done</strong><br><pre style="white-space:pre-wrap">${escapeHtml(json.stdout || '')}</pre>`;
+                    btn.textContent = 'Deployed';
+                } catch (err) {
+                    statusBox.innerHTML = `<strong>Error:</strong> ${escapeHtml(err.message)}`;
+                    btn.disabled = false;
+                    btn.textContent = 'Deploy Now (via API)';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
