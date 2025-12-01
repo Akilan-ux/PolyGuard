@@ -338,7 +338,9 @@
                 const json = await resp.json();
 
                 if (json.verified && json.company) {
-                    const qrImg = json.qrEndpoint ? `<img src="${json.qrEndpoint}" style="max-width:200px; border:2px solid #4CAF50; border-radius:8px; margin-top:12px;" alt="QR Code" />` : '';
+                    // Use stored SVG directly
+                    const qrImg = json.qr_code ? `<div style="margin-top:12px;">${json.qr_code}</div>` : '';
+
                     resultDiv.innerHTML = `
                         <div class="result-box" style="border-left: 4px solid #4CAF50; background: #F0F8F0; margin-top: 20px;">
                             <strong style="color: #4CAF50;">✓ Verified</strong><br>
