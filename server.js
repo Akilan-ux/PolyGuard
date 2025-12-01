@@ -1,9 +1,22 @@
 const express = require('express');
 const { spawn } = require('child_process');
+const QRCode = require('qrcode');
+const { Pool } = require('pg');
 const app = express();
 const port = process.env.PORT || 3000;
 const path = require('path');
 const crypto = require('crypto');
+
+const DATABASE_URL = "postgresql://neondb_owner:npg_FTYS4XhWbd5l@ep-shiny-sunset-ae0ezxj1-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+
+// Initialize Neon database pool
+// Initialize Neon database pool
+const pool = new Pool({
+  connectionString: DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
 
 app.use(express.json());
 
@@ -75,5 +88,82 @@ app.post('/hash', (req, res) => {
   console.log(`SHA-256 Hash for product_id '${product_id}': ${sha}`);
   res.json({ product_id, sha256: sha });
 });
+
+// Generate QR code and store in Neon database
+app.post('/qr-store', async (req, res) => {
+  try {
+    const { hash, company, email, fullName } = req.body;
+    if (!hash || !company) {
+      return res.status(400).json({ error: 'Missing hash or company' });
+    }
+
+    // Generate QR code as data URL
+    const qrDataUrl = await QRCode.toDataURL(hash, { width: 300, errorCorrectionLevel: 'H' });
+
+    // Store in Neon database
+    const query = `
+      INSERT INTO qr_registrations (hash, qr_code, company, email, full_name, created_at)
+      VALUES ($1, $2, $3, $4, $5, NOW())
+      RETURNING id, hash, company, created_at;
+    `;
+    const result = await pool.query(query, [hash, qrDataUrl, company, email, fullName]);
+
+    res.json({ success: true, qrCode: qrDataUrl, dbId: result.rows[0].id });
+  } catch (err) {
+    console.error('QR store error:', err.message);
+    res.status(500).json({ error: 'Failed to store QR code', details: err.message });
+  }
+});
+
+// Retrieve and verify QR from database
+app.post('/qr-verify', async (req, res) => {
+  try {
+    const { hash } = req.body;
+    if (!hash) return res.status(400).json({ error: 'Missing hash' });
+
+    const query = `SELECT * FROM qr_registrations WHERE hash = $1 LIMIT 1;`;
+    const result = await pool.query(query, [hash]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ verified: false, error: 'QR not found' });
+    }
+
+    const row = result.rows[0];
+    res.json({
+      verified: true,
+      hash: row.hash,
+      company: row.company,
+      email: row.email,
+      full_name: row.full_name,
+      created_at: row.created_at,
+      qrCode: row.qr_code
+    });
+  } catch (err) {
+    console.error('QR verify error:', err.message);
+    res.status(500).json({ error: 'Failed to verify QR code' });
+  }
+});
+
+// Initialize database on startup
+async function initDatabase() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS qr_registrations (
+        id SERIAL PRIMARY KEY,
+        hash VARCHAR(64) UNIQUE NOT NULL,
+        qr_code TEXT NOT NULL,
+        company VARCHAR(255) NOT NULL,
+        email VARCHAR(255),
+        full_name VARCHAR(255),
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
+    console.log('Database table initialized');
+  } catch (err) {
+    console.error('Database init error:', err.message);
+  }
+}
+
+initDatabase();
 
 app.listen(port, () => console.log(`API server listening on http://0.0.0.0:${port}`));

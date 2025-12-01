@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>PolyGuard Demo — Registration, Authentication, Proof of Transaction</title>
     <link rel="stylesheet" href="main.css">
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     <style>
         /* Small overrides for demo page */
         .demo-container {
@@ -146,17 +147,20 @@
         </section>
 
         <section id="panel-auth" role="tabpanel" aria-labelledby="tab-auth" class="tab-panel">
-            <h3>Authentication</h3>
-            <p style="color:var(--medium-gray)">QR authentication and blockchain verification.</p>
-            <div style="margin-bottom:14px;">
-                <label style="display:inline-block; width:120px; font-weight:500; color:var(--dark-gray);">QR Payload:</label>
-                <input type="text" id="qrInput" style="width:300px;" placeholder="Paste QR payload or code" />
+            <h3>Scan & Authenticate</h3>
+            <p style="color:var(--medium-gray)">Scan a QR code to verify the transaction.</p>
+            
+            <div style="margin-bottom: 20px;">
+                <button id="startScanner" class="btn btn-primary">Start Camera</button>
+                <button id="stopScanner" class="btn btn-tier-secondary" style="display: none;">Stop Camera</button>
             </div>
-            <div style="display:flex; gap:12px; margin-top:8px;">
-                <button id="authBtn" class="btn btn-primary">Authenticate QR</button>
-                <button id="authSimBtn" class="btn btn-tier-secondary">Failed Auth</button>
+
+            <div id="scannerContainer" style="display: none; text-align: center; margin: 20px 0;">
+                <canvas id="scanner-canvas" style="border: 2px solid #0052CC; border-radius: 8px; max-width: 400px; width: 100%;"></canvas>
+                <p style="color: #666; font-size: 12px; margin-top: 10px;">Point your camera at the QR code</p>
             </div>
-            <div id="authResult" class="result-box" style="display:none"></div>
+
+            <div id="scanResult"></div>
         </section>
 
         <section id="panel-proof" role="tabpanel" aria-labelledby="tab-proof" class="tab-panel">
@@ -230,7 +234,7 @@
                 result.style.borderColor = 'var(--green)';
                 result.innerHTML = `<strong>Success:</strong> Hash QR code created for <strong>${escapeHtml(name)}</strong> (${escapeHtml(email)}).<br>Product ID (company): <code>${escapeHtml(company)}</code><br>SHA-256: <code>${sha}</code>`;
                         // Show deploy subsection asking whether to deploy to private blockchain
-                        showDeploySubsection(sha);
+                        showDeploySubsection(sha, name, email, company);
             } catch (err) {
                 result.style.borderColor = 'var(--red)';
                 result.innerHTML = `<strong>Error:</strong> Could not reach local hash API. Make sure the server is running</strong>`;
@@ -242,34 +246,102 @@
             const result = document.getElementById('regResult');
             result.style.display = 'none';
             result.innerHTML = '';
-        })
+        });
 
-        // Authentication simulation
-        document.getElementById('authBtn').addEventListener('click', function() {
-            const payload = document.getElementById('qrInput').value.trim();
-            const r = document.getElementById('authResult');
-            r.style.display = 'block';
-            if (!payload) {
-                r.innerHTML = '<strong>Error:</strong> No QR payload provided.';
-                return;
-            }
-            // Fake verification
-            const ok = Math.random() > 0.12; // mostly succeed
-            if (ok) {
-                r.innerHTML = `<strong>Authenticated:</strong> QR payload verified. Proof hash: <code>0x${Math.random().toString(16).slice(2,18)}</code>`;
-                r.style.borderColor = 'var(--green)';
-            } else {
-                r.innerHTML = '<strong>Failed:</strong> QR payload could not be verified.';
-                r.style.borderColor = 'var(--red)';
+        // QR Scanner for Authentication tab
+        let cameraStream = null;
+        let scanningActive = false;
+
+        document.getElementById('startScanner').addEventListener('click', async () => {
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                const video = document.createElement('video');
+                video.srcObject = cameraStream;
+                video.setAttribute('playsinline', true);
+                video.setAttribute('autoplay', true);
+                video.play();
+
+                document.getElementById('scannerContainer').style.display = 'block';
+                document.getElementById('startScanner').style.display = 'none';
+                document.getElementById('stopScanner').style.display = 'inline-block';
+
+                scanningActive = true;
+                scanQRCode(video);
+            } catch (err) {
+                alert('Camera access denied or unavailable: ' + err.message);
             }
         });
 
-        document.getElementById('authSimBtn').addEventListener('click', function() {
-            const r = document.getElementById('authResult');
-            r.style.display = 'block';
-            r.innerHTML = '<strong>Failed:</strong> Simulated authentication failure.';
-            r.style.borderColor = 'var(--red)';
+        document.getElementById('stopScanner').addEventListener('click', () => {
+            scanningActive = false;
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+            }
+            document.getElementById('scannerContainer').style.display = 'none';
+            document.getElementById('startScanner').style.display = 'inline-block';
+            document.getElementById('stopScanner').style.display = 'none';
+            document.getElementById('scanResult').innerHTML = '';
         });
+
+        function scanQRCode(video) {
+            const canvas = document.getElementById('scanner-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 320;
+            canvas.height = 240;
+
+            const scanFrame = () => {
+                if (!scanningActive) return;
+
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                try {
+                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+                    if (code) {
+                        scanningActive = false;
+                        handleQRCode(code.data);
+                        document.getElementById('stopScanner').click();
+                        return;
+                    }
+                } catch (e) {
+                    // Continue scanning
+                }
+
+                requestAnimationFrame(scanFrame);
+            };
+
+            scanFrame();
+        }
+
+        async function handleQRCode(qrData) {
+            const resultDiv = document.getElementById('scanResult');
+            resultDiv.innerHTML = '<p style="color: #0052CC; margin-top: 20px;">Verifying QR code...</p>';
+
+            try {
+                const resp = await fetch('/qr-verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ hash: qrData })
+                });
+                const json = await resp.json();
+
+                if (json.verified && json.company) {
+                    resultDiv.innerHTML = `
+                        <div class="result-box" style="border-left: 4px solid #4CAF50; background: #F0F8F0; margin-top: 20px;">
+                            <strong style="color: #4CAF50;">✓ Verified</strong><br>
+                            Company: ${escapeHtml(json.company)}<br>
+                            Email: ${escapeHtml(json.email)}<br>
+                            Name: ${escapeHtml(json.full_name)}<br>
+                            Registered: ${new Date(json.created_at).toLocaleString()}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<div class="result-box" style="border-left: 4px solid #f44336; background: #FFEBEE; margin-top: 20px;"><strong style="color: #f44336;">✗ QR Not Found</strong></div>';
+                }
+            } catch (err) {
+                resultDiv.innerHTML = `<div class="result-box" style="border-left: 4px solid #f44336; background: #FFEBEE; margin-top: 20px;"><strong style="color: #f44336;">Error:</strong> ${escapeHtml(err.message)}</div>`;
+            }
+        }
 
         // Proof of Transaction simulation
         document.getElementById('proofBtn').addEventListener('click', function() {
@@ -299,7 +371,7 @@
             return str.replace(/[&<>"']/g, function (m) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#039;"})[m]; });
         }
         // --- Deploy subsection logic ---
-        function showDeploySubsection(sha) {
+        function showDeploySubsection(sha, fullName, email, company) {
             // Remove existing if present
             let el = document.getElementById('deploySub');
             if (el) el.remove();
@@ -315,24 +387,17 @@
                     <button id="deployNo" class="btn btn-tier-secondary">No, thanks</button>
                 </div>
                 <div id="deployInstructions" style="display:none; margin-top:12px; background:var(--light-gray); padding:12px; border-radius:8px; border:1px solid var(--border-gray);">
-                    <p style="margin:0 0 8px 0;"><strong>Quick start:</strong></p>
-                    <ol style="margin:0 0 12px 20px; color:var(--medium-gray)">
-                        <li>Install Node dependencies: <code>npm install</code></li>
-                        <li>Start local Hardhat node (opens JSON-RPC at <code>127.0.0.1:8545</code>): <code>npx hardhat node</code></li>
-                        <li>Deploy contract and register the hash (replace <code>HASH</code> below with the value):</li>
-                    </ol>
-                    <pre style="background:#fff; padding:10px; border-radius:6px; border:1px solid var(--border-gray); overflow:auto;"><code id="deployCmd"># Example:
-npm install
-npx hardhat node
-# In another terminal:
-node scripts/register_call.js ${sha}
-</code></pre>
+                    <p style="margin:0 0 8px 0;"><strong>Deploy & Generate QR</strong></p>          
+                    <p style="color:var(--medium-gray)">Press Deploy Now to register your hash on the blockchain and generate a QR code. This QR code can then be used for transactions and scanned by your customers.</p>
                     <div style="margin-top:8px; display:flex; gap:8px;">
-                        <button id="copyCmd" class="btn btn-secondary">Copy commands</button>
-                        <a id="openReadme" href="README-HARDHAT.md" class="btn btn-tier-secondary">Open README</a>
-                        <button id="deployNow" class="btn btn-primary">Deploy Now (via API)</button>
+                        <button id="deployNow" class="btn btn-primary">Deploy Now & Generate QR</button>
                     </div>
-                    <p style="margin-top:8px; color:var(--medium-gray); font-size:13px;">Note: The Hardhat node is configured for zero gas price locally. These commands run on your machine only.</p>
+                    <p style="margin-top:8px; color:var(--medium-gray); font-size:13px;">Note: The blockchain for PolyGuard is configured for zero gas price locally.</p>
+                </div>
+                <div id="qrResult" style="display:none; margin-top:12px; padding:12px; border-radius:8px; background:var(--light-blue); border:1px solid var(--primary-blue); text-align:center;">
+                    <p style="margin:0 0 12px 0;"><strong>✓ QR Code Generated & Stored</strong></p>
+                    <img id="qrImage" style="max-width:300px; border:2px solid var(--primary-blue); border-radius:8px;" />
+                    <p style="margin:12px 0 0 0; font-size:13px; color:var(--medium-gray);">Scan this QR code with your phone on the Authentication tab</p>
                 </div>
             `;
 
@@ -352,33 +417,30 @@ node scripts/register_call.js ${sha}
             document.getElementById('deployNow').addEventListener('click', async () => {
                 const btn = document.getElementById('deployNow');
                 btn.disabled = true;
-                btn.textContent = 'Deploying...';
-                const statusBox = document.createElement('div');
-                statusBox.className = 'result-box';
-                statusBox.style.display = 'block';
-                statusBox.innerText = 'Deploying to local network via API...';
-                container.appendChild(statusBox);
+                btn.textContent = 'Generating QR...';
 
                 try {
-                    const resp = await fetch('/deploy', {
+                    const resp = await fetch('/qr-store', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ hash: sha })
+                        body: JSON.stringify({ hash: sha, company, email, fullName })
                     });
                     const json = await resp.json();
                     if (!resp.ok) {
-                        statusBox.innerHTML = `<strong>Error:</strong> ${escapeHtml(json.error || JSON.stringify(json))}`;
+                        alert(`Error: ${json.error || 'Failed to store QR'}`);
                         btn.disabled = false;
-                        btn.textContent = 'Deploy Now (via API)';
+                        btn.textContent = 'Deploy Now & Generate QR';
                         return;
                     }
 
-                    statusBox.innerHTML = `<strong>Done</strong><br><pre style="white-space:pre-wrap">${escapeHtml(json.stdout || '')}</pre>`;
-                    btn.textContent = 'Deployed';
+                    // Display QR code
+                    document.getElementById('qrImage').src = json.qrCode;
+                    document.getElementById('qrResult').style.display = 'block';
+                    btn.textContent = 'QR Generated & Stored';
                 } catch (err) {
-                    statusBox.innerHTML = `<strong>Error:</strong> ${escapeHtml(err.message)}`;
+                    alert(`Error: ${err.message}`);
                     btn.disabled = false;
-                    btn.textContent = 'Deploy Now (via API)';
+                    btn.textContent = 'Deploy Now & Generate QR';
                 }
             });
         }
