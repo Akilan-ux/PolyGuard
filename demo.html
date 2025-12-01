@@ -299,7 +299,9 @@
                     const code = jsQR(imageData.data, imageData.width, imageData.height);
                     if (code) {
                         scanningActive = false;
-                        handleQRCode(code.data);
+                        // Trim and normalize scanned string before handling
+                        const scanned = String(code.data || '').trim();
+                        handleQRCode(scanned);
                         document.getElementById('stopScanner').click();
                         return;
                     }
@@ -315,17 +317,28 @@
 
         async function handleQRCode(qrData) {
             const resultDiv = document.getElementById('scanResult');
-            resultDiv.innerHTML = '<p style="color: #0052CC; margin-top: 20px;">Verifying QR code...</p>';
+            // Show scanned payload for debugging
+            const scanned = String(qrData || '');
+            const normalized = (scanned.startsWith('0x') ? scanned.slice(2) : scanned).trim().toLowerCase();
+            resultDiv.innerHTML = `
+                <div style="margin-top:12px; font-size:13px; color:var(--medium-gray);">
+                    <div><strong>Scanned:</strong> <code id="scannedVal">${escapeHtml(scanned)}</code></div>
+                    <div><strong>Normalized:</strong> <code id="normalizedVal">${escapeHtml(normalized)}</code></div>
+                    <p style="color: #0052CC; margin-top: 8px;">Verifying QR code...</p>
+                </div>
+            `;
 
             try {
+                // Send the normalized value to the server for verification
                 const resp = await fetch('/qr-verify', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ hash: qrData })
+                    body: JSON.stringify({ hash: normalized })
                 });
                 const json = await resp.json();
 
                 if (json.verified && json.company) {
+                    const qrImg = json.qrEndpoint ? `<img src="${json.qrEndpoint}" style="max-width:200px; border:2px solid #4CAF50; border-radius:8px; margin-top:12px;" alt="QR Code" />` : '';
                     resultDiv.innerHTML = `
                         <div class="result-box" style="border-left: 4px solid #4CAF50; background: #F0F8F0; margin-top: 20px;">
                             <strong style="color: #4CAF50;">✓ Verified</strong><br>
@@ -333,6 +346,7 @@
                             Email: ${escapeHtml(json.email)}<br>
                             Name: ${escapeHtml(json.full_name)}<br>
                             Registered: ${new Date(json.created_at).toLocaleString()}
+                            ${qrImg}
                         </div>
                     `;
                 } else {
@@ -410,10 +424,15 @@
             document.getElementById('deployNo').addEventListener('click', () => {
                 container.remove();
             });
-            document.getElementById('copyCmd').addEventListener('click', async () => {
-                const text = document.getElementById('deployCmd').innerText;
-                try { await navigator.clipboard.writeText(text); alert('Commands copied to clipboard'); } catch(e) { alert('Copy not available: ' + e.message); }
-            });
+            
+            const copyCmd = document.getElementById('copyCmd');
+            if (copyCmd) {
+                copyCmd.addEventListener('click', async () => {
+                    const text = document.getElementById('deployCmd').innerText;
+                    try { await navigator.clipboard.writeText(text); alert('Commands copied to clipboard'); } catch(e) { alert('Copy not available: ' + e.message); }
+                });
+            }
+            
             document.getElementById('deployNow').addEventListener('click', async () => {
                 const btn = document.getElementById('deployNow');
                 btn.disabled = true;
@@ -433,8 +452,13 @@
                         return;
                     }
 
-                    // Display QR code
-                    document.getElementById('qrImage').src = json.qrCode;
+                    // Display QR code using compact SVG endpoint
+                    if (json.qrEndpoint) {
+                        document.getElementById('qrImage').src = json.qrEndpoint;
+                    } else if (json.qrCode) {
+                        // fallback to data URL if present
+                        document.getElementById('qrImage').src = json.qrCode;
+                    }
                     document.getElementById('qrResult').style.display = 'block';
                     btn.textContent = 'QR Generated & Stored';
                 } catch (err) {
