@@ -338,8 +338,11 @@
                 const json = await resp.json();
 
                 if (json.verified && json.company) {
-                    // Use stored SVG directly
-                    const qrImg = json.qr_code ? `<div style="margin-top:12px;">${json.qr_code}</div>` : '';
+                   const qrImg = json.qr_code
+                    ? `<img src="data:image/svg+xml;base64,${btoa(json.qr_code)}"
+                            style="max-width:250px; border:2px solid #4CAF50; border-radius:8px; margin-top:12px;" />`
+                    : '';
+
 
                     resultDiv.innerHTML = `
                         <div class="result-box" style="border-left: 4px solid #4CAF50; background: #F0F8F0; margin-top: 20px;">
