@@ -286,27 +286,43 @@
         function scanQRCode(video) {
             const canvas = document.getElementById('scanner-canvas');
             const ctx = canvas.getContext('2d');
-            canvas.width = 320;
-            canvas.height = 240;
+
+            // Make video element visible & 50% of screen width
+            video.style.width = "50vw";
+            video.style.maxWidth = "600px";
+
+            // When the video is ready, resize canvas to match
+            video.addEventListener("loadedmetadata", () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+            });
 
             const scanFrame = () => {
                 if (!scanningActive) return;
+
+                // Always match canvas to actual camera resolution
+                if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                }
 
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
                 try {
-                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                        inversionAttempts: "attemptBoth",
+                    });
+
                     if (code) {
                         scanningActive = false;
-                        // Trim and normalize scanned string before handling
                         const scanned = String(code.data || '').trim();
                         handleQRCode(scanned);
                         document.getElementById('stopScanner').click();
                         return;
                     }
                 } catch (e) {
-                    // Continue scanning
+                    // ignore
                 }
 
                 requestAnimationFrame(scanFrame);
@@ -314,6 +330,7 @@
 
             scanFrame();
         }
+
 
         async function handleQRCode(qrData) {
             const resultDiv = document.getElementById('scanResult');
