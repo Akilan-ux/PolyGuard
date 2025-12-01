@@ -287,49 +287,56 @@
             const canvas = document.getElementById('scanner-canvas');
             const ctx = canvas.getContext('2d');
 
-            // Make video element visible & 50% of screen width
+            // Size the preview video
             video.style.width = "50vw";
             video.style.maxWidth = "600px";
 
-            // When the video is ready, resize canvas to match
-            video.addEventListener("loadedmetadata", () => {
+            // Wait until the camera has real dimensions
+            const waitForVideo = () => {
+                if (video.videoWidth > 0 && video.videoHeight > 0) {
+                    initializeScanner();
+                } else {
+                    requestAnimationFrame(waitForVideo);
+                }
+            };
+
+            const initializeScanner = () => {
+                // Lock the canvas to the camera's resolution ONCE
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
-            });
 
-            const scanFrame = () => {
-                if (!scanningActive) return;
+                const scanFrame = () => {
+                    if (!scanningActive) return;
 
-                // Always match canvas to actual camera resolution
-                if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                }
+                    // Draw the frame
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    let code;
+                    try {
+                        code = jsQR(imageData.data, imageData.width, imageData.height, {
+                            inversionAttempts: "attemptBoth"
+                        });
+                    } catch (err) {
+                        console.warn("jsQR error:", err);
+                    }
 
-                try {
-                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                        inversionAttempts: "attemptBoth",
-                    });
-
-                    if (code) {
+                    if (code && code.data) {
                         scanningActive = false;
-                        const scanned = String(code.data || '').trim();
-                        handleQRCode(scanned);
+                        handleQRCode(code.data.trim());
                         document.getElementById('stopScanner').click();
                         return;
                     }
-                } catch (e) {
-                    // ignore
-                }
 
-                requestAnimationFrame(scanFrame);
+                    requestAnimationFrame(scanFrame);
+                };
+
+                scanFrame();
             };
 
-            scanFrame();
+            waitForVideo();
         }
+
 
 
         async function handleQRCode(qrData) {
