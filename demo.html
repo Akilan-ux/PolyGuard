@@ -206,9 +206,10 @@
                 return;
             }
 
-            // POST to local hash API. Make sure `hash.py` server is running (see instructions below).
+            // POST to hash endpoint (Netlify function or local server)
             try {
-                const res = await fetch('/hash', {
+                const apiPath = window.location.hostname === 'localhost' ? '/hash' : '/.netlify/functions/hash';
+                const res = await fetch(apiPath, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ product_id: company })
@@ -350,7 +351,8 @@ node scripts/register_call.js ${sha}
                 container.appendChild(statusBox);
 
                 try {
-                    const resp = await fetch('/deploy', {
+                    const deployPath = window.location.hostname === 'localhost' ? '/deploy' : '/.netlify/functions/deploy';
+                    const resp = await fetch(deployPath, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ hash: sha })
