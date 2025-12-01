@@ -122,11 +122,11 @@
             <form id="registerForm">
                 <div style="margin-bottom:14px;">
                     <label style="display:inline-block; width:120px; font-weight:500; color:var(--dark-gray);">Full Name:</label>
-                    <input type="email" name="fullName" style="width:300px;" required />
+                    <input type="text" name="fullName" style="width:300px;" required />
                 </div>
                 <div style="margin-bottom:14px;">
                     <label style="display:inline-block; width:120px; font-weight:500; color:var(--dark-gray);">Company:</label>
-                    <input type="email" name="company" style="width:300px;" />
+                    <input type="text" name="company" style="width:300px;" />
                 </div>
                 <div style="margin-bottom:14px;">
                     <label style="display:inline-block; width:120px; font-weight:500; color:var(--dark-gray);">Work Email:</label>
@@ -134,7 +134,7 @@
                 </div>
                 <div style="margin-bottom:14px;">
                     <label style="display:inline-block; width:120px; font-weight:500; color:var(--dark-gray);">Phone:</label>
-                    <input type="email" name="phone" style="width:300px;" placeholder="(optional)" />
+                    <input type="text" name="phone" style="width:300px;" placeholder="(optional)" />
                 </div>
                 
                 <div style="display:flex; gap:12px; margin-top:20px;">
@@ -150,7 +150,7 @@
             <p style="color:var(--medium-gray)">QR authentication and blockchain verification.</p>
             <div style="margin-bottom:14px;">
                 <label style="display:inline-block; width:120px; font-weight:500; color:var(--dark-gray);">QR Payload:</label>
-                <input type="email" id="qrInput" style="width:300px;" placeholder="Paste QR payload or code" />
+                <input type="text" id="qrInput" style="width:300px;" placeholder="Paste QR payload or code" />
             </div>
             <div style="display:flex; gap:12px; margin-top:8px;">
                 <button id="authBtn" class="btn btn-primary">Authenticate QR</button>
@@ -164,7 +164,7 @@
             <p style="color:var(--medium-gray)">Enter a transaction ID to verify an immutable proof on-chain (Ethereum).</p>
             <div style="margin-bottom:14px;">
                 <label style="display:inline-block; width:120px; font-weight:500; color:var(--dark-gray);">Transaction ID:</label>
-                <input type="email" id="txId" style="width:300px;" placeholder="e.g. tx_0x123abc..." />
+                <input type="text" id="txId" style="width:300px;" placeholder="e.g. tx_0x123abc..." />
             </div>
             <div style="display:flex; gap:12px; margin-top:8px;">
                 <button id="proofBtn" class="btn btn-primary">Verify Transaction</button>
