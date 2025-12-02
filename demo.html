@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>PolyGuard Demo — Registration, Authentication, Proof of Transaction</title>
     <link rel="stylesheet" href="main.css">
+    <script src="config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     <style>
         /* Small overrides for demo page */
@@ -205,7 +206,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     }
 
     try {
-        const res = await fetch("/auth/login", {
+        const res = await fetch(`${CONFIG.API_URL}/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -271,7 +272,7 @@ registerForm.onsubmit = async (e) => {
 
     // Send registration data to backend
     try {
-        const res = await fetch("/auth/register", {
+        const res = await fetch(`${CONFIG.API_URL}/auth/register`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

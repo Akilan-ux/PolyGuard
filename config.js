@@ -8,7 +8,7 @@ const CONFIG = {
   // API endpoints
   API_URLS: {
     local: 'http://localhost:3000',
-    production: 'https://polyguard-api.onrender.com' // UPDATE THIS after deploying to Render
+    production: 'https://polyguard-vlzf.onrender.com'
   },
   
   // Get current API URL

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Admin Dashboard - PolyGuard</title>
     <link rel="stylesheet" href="main.css">
+    <script src="config.js"></script>
     <style>
         * { box-sizing: border-box; }
         
@@ -336,7 +337,7 @@
                 options.body = JSON.stringify(data);
             }
 
-            const response = await fetch(endpoint, options);
+            const response = await fetch(`${CONFIG.API_URL}${endpoint}`, options);
             if (response.status === 401 || response.status === 403) {
                 localStorage.clear();
                 window.location.href = '/demo.html';

@@ -455,7 +455,8 @@
         // Load payment info from API
         async function loadPaymentInfo() {
             try {
-                const response = await fetch(`http://localhost:3000/public/merchant-data/${companySlug}`);
+                const apiUrl = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://polyguard-vlzf.onrender.com';
+                const response = await fetch(`${apiUrl}/public/merchant-data/${companySlug}`);
                 
                 if (!response.ok) {
                     throw new Error('Merchant not found');
@@ -485,7 +486,7 @@
                 }
 
                 // Log QR scan
-                await fetch('http://localhost:3000/public/log-qr-scan', {
+                await fetch(`${apiUrl}/public/log-qr-scan`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ qr_url: window.location.href })

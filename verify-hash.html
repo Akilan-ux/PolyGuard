@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Verify Hash - PolyGuard</title>
     <link rel="stylesheet" href="main.css">
+    <script src="config.js"></script>
     <style>
         * { box-sizing: border-box; }
         
@@ -338,7 +339,7 @@
             resultBox.style.display = 'none';
 
             try {
-                const response = await fetch('/public/verify-hash', {
+                const response = await fetch(`${CONFIG.API_URL}/public/verify-hash`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

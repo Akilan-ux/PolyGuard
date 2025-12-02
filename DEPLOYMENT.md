@@ -45,7 +45,7 @@ The backend (server.js) needs to be deployed to a Node.js hosting platform.
 
 6. Deploy!
 
-Your API will be at: `https://polyguard-api.onrender.com`
+Your API will be at: `https://polyguard-vlzf.onrender.com`
 
 ### Alternative: Railway
 
@@ -64,7 +64,7 @@ After deploying the backend, update all frontend files to use your backend URL:
 const API_URL = 'http://localhost:3000';
 
 // New (production)
-const API_URL = 'https://polyguard-api.onrender.com';
+const API_URL = 'https://polyguard-vlzf.onrender.com';
 ```
 
 **Files to update:**
