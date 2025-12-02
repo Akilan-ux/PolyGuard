@@ -8,7 +8,7 @@ const port = process.env.PORT || 3000;
 const path = require('path');
 const crypto = require('crypto');
 
-const DATABASE_URL = "postgresql://neondb_owner:npg_FTYS4XhWbd5l@ep-shiny-sunset-ae0ezxj1-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+const DATABASE_URL = process.env.DATABASE_URL || "postgresql://neondb_owner:npg_FTYS4XhWbd5l@ep-shiny-sunset-ae0ezxj1-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
 
 // JWT Configuration
 const JWT_SECRET = process.env.JWT_SECRET || 'polyguard-secret-key-change-in-production';
@@ -20,6 +20,25 @@ const pool = new Pool({
   ssl: {
     rejectUnauthorized: false
   }
+});
+
+// CORS middleware - allow requests from Netlify and localhost
+app.use((req, res, next) => {
+  const allowedOrigins = [
+    'https://polyguard.netlify.app',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000'
+  ];
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
 });
 
 app.use(express.json());
@@ -805,9 +824,47 @@ async function initDatabase() {
 
 initDatabase();
 
-app.listen(port, () => {
-  console.log(`\n🚀 PolyGuard Blockchain API Server running at http://0.0.0.0:${port}`);
-  console.log(`📊 Database: Neon PostgreSQL`);
+// Root endpoint - API status
+app.get('/', (req, res) => {
+  res.json({
+    name: 'PolyGuard Blockchain API',
+    version: '1.0.0',
+    status: 'online',
+    endpoints: {
+      authentication: [
+        'POST /auth/register',
+        'POST /auth/login'
+      ],
+      blockchain: [
+        'POST /merchants/create-qr',
+        'GET /merchants/list-qr',
+        'POST /merchants/create-hash',
+        'GET /merchants/list-hashes',
+        'GET /merchants/recent-transactions'
+      ],
+      admin: [
+        'GET /admin/merchants',
+        'POST /admin/approve/:merchantId',
+        'POST /admin/reject/:merchantId'
+      ],
+      public: [
+        'POST /public/verify-hash',
+        'POST /public/log-qr-scan',
+        'GET /public/merchant-data/:companySlug'
+      ]
+    },
+    documentation: 'https://github.com/Akilan-ux/PolyGuard'
+  });
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
+const server = app.listen(port, '0.0.0.0', () => {
+  console.log(`\n🚀 PolyGuard Blockchain API Server running on port ${port}`);
+  console.log(`📊 Database: ${DATABASE_URL ? 'Connected to Neon PostgreSQL' : 'No DATABASE_URL set'}`);
   console.log(`🔐 Authentication: JWT (${JWT_EXPIRES_IN} expiry)`);
   console.log(`\nEndpoints ready:`);
   console.log(`  Authentication:`);
@@ -826,11 +883,31 @@ app.listen(port, () => {
   console.log(`  Public:`);
   console.log(`    - POST /public/verify-hash`);
   console.log(`    - POST /public/log-qr-scan`);
+  console.log(`    - GET  /public/merchant-data/:companySlug`);
   console.log(`  Legacy:`);
   console.log(`    - POST /deploy`);
   console.log(`    - POST /hash`);
   console.log(`    - POST /qr-store`);
   console.log(`    - POST /qr-verify\n`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received, closing server gracefully...');
+  server.close(() => {
+    console.log('Server closed');
+    pool.end();
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('\nSIGINT received, closing server gracefully...');
+  server.close(() => {
+    console.log('Server closed');
+    pool.end();
+    process.exit(0);
+  });
 });
 
 // Serve QR code from database

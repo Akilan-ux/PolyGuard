@@ -1,12 +1,14 @@
 [build]
   command = "npm install"
   publish = "."
+  functions = "netlify/functions"
 
-[dev]
-  command = "npm start"
-  port = 3000
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
 
 [[redirects]]
   from = "/*"
-  to = "/main.html"
+  to = "/demo.html"
   status = 200

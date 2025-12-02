@@ -6,7 +6,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "start": "node server.js",
+    "start": "echo 'Netlify static site deployed'",
     "node": "npx hardhat node",
     "deploy-local": "npx hardhat run --network localhost scripts/register.js",
     "deploy-local-with-hash": "node ./scripts/register_call.js",
