@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Verified Merchant - PolyGuard</title>
+    <link rel="stylesheet" href="main.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, var(--light-blue) 0%, rgba(240, 244, 255, 0.5) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .verification-container {
+            max-width: 500px;
+            width: 100%;
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .verified-badge {
+            width: 80px;
+            height: 80px;
+            background: var(--green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 40px;
+        }
+
+        .company-name {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark-blue);
+            margin: 0 0 12px;
+        }
+
+        .verification-text {
+            color: var(--medium-gray);
+            font-size: 16px;
+            margin: 0 0 32px;
+        }
+
+        .transfer-card {
+            background: var(--light-gray);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 2px solid var(--border-gray);
+        }
+
+        .transfer-card h3 {
+            font-size: 14px;
+            color: var(--medium-gray);
+            margin: 0 0 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .bank-info {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .bank-info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .bank-info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .bank-info-label {
+            color: var(--medium-gray);
+            font-weight: 500;
+        }
+
+        .bank-info-value {
+            color: var(--dark-gray);
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        .copy-btn {
+            background: var(--primary-blue);
+            color: var(--white);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .copy-btn:hover {
+            background: var(--dark-blue);
+        }
+
+        .security-note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 24px;
+            font-size: 13px;
+            color: #856404;
+            text-align: left;
+        }
+
+        .security-note strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .powered-by {
+            margin-top: 32px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-gray);
+            font-size: 12px;
+            color: var(--medium-gray);
+        }
+
+        .powered-by a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        @media (max-width: 480px) {
+            .verification-container {
+                padding: 30px 20px;
+            }
+
+            .company-name {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="verification-container">
+        <div class="verified-badge">✓</div>
+        
+        <h1 class="company-name" id="companyName">Loading...</h1>
+        
+        <p class="verification-text">
+            This is a verified merchant on PolyGuard platform
+        </p>
+
+        <div class="transfer-card">
+            <h3>Quick Transfer Details</h3>
+            
+            <div class="bank-info">
+                <div class="bank-info-row">
+                    <span class="bank-info-label">Bank Name:</span>
+                    <span class="bank-info-value" id="bankName">DBS Bank</span>
+                </div>
+                <div class="bank-info-row">
+                    <span class="bank-info-label">Account Number:</span>
+                    <span class="bank-info-value" id="accountNumber">123-456789-0</span>
+                </div>
+                <div class="bank-info-row">
+                    <span class="bank-info-label">Account Name:</span>
+                    <span class="bank-info-value" id="accountName">Company Name Pte Ltd</span>
+                </div>
+            </div>
+
+            <button class="copy-btn" onclick="copyAccountNumber()">Copy Account Number</button>
+        </div>
+
+        <div class="security-note">
+            <strong>🔒 Security Reminder</strong>
+            Always verify payment details before transferring funds. PolyGuard verified merchants display this badge and are registered with us.
+        </div>
+
+        <div class="powered-by">
+            Powered by <a href="https://polyguard.netlify.app">PolyGuard</a>
+        </div>
+    </div>
+
+    <script>
+        // Extract company slug from URL
+        const pathParts = window.location.pathname.split('/');
+        const fileName = pathParts[pathParts.length - 1];
+        const companySlug = fileName.replace('verified-', '').replace('.html', '');
+
+        // Mock merchant data (in production, fetch from API)
+        const merchantData = {
+            'example-company': {
+                name: 'Example Company Pte Ltd',
+                bank: 'DBS Bank',
+                accountNumber: '123-456789-0',
+                accountName: 'Example Company Pte Ltd'
+            },
+            // Add more companies as needed
+        };
+
+        // Display merchant info
+        const merchant = merchantData[companySlug];
+        
+        if (merchant) {
+            document.getElementById('companyName').textContent = merchant.name;
+            document.getElementById('bankName').textContent = merchant.bank;
+            document.getElementById('accountNumber').textContent = merchant.accountNumber;
+            document.getElementById('accountName').textContent = merchant.accountName;
+        } else {
+            // If no specific data, use slug to generate company name
+            const companyName = companySlug
+                .split('-')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+            
+            document.getElementById('companyName').textContent = companyName + ' Pte Ltd';
+            document.getElementById('accountName').textContent = companyName + ' Pte Ltd';
+        }
+
+        // Log QR scan to backend
+        fetch('/public/log-qr-scan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                qr_url: window.location.href
+            })
+        }).catch(err => console.log('Scan log failed:', err));
+
+        function copyAccountNumber() {
+            const accountNumber = document.getElementById('accountNumber').textContent;
+            navigator.clipboard.writeText(accountNumber).then(() => {
+                alert('Account number copied to clipboard!');
+            }).catch(() => {
+                alert('Failed to copy. Please copy manually.');
+            });
+        }
+    </script>
+</body>
+</html>

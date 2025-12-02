@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Verify Hash - PolyGuard</title>
+    <link rel="stylesheet" href="main.css">
+    <style>
+        * { box-sizing: border-box; }
+        
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .verify-container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 32px;
+            margin: 0 0 10px;
+        }
+
+        .header .logo {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .verify-form {
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .verify-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .verify-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .verify-btn:active {
+            transform: translateY(0);
+        }
+
+        .verify-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result-box {
+            display: none;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-box.verified {
+            background: #d4edda;
+            border: 2px solid #28a745;
+        }
+
+        .result-box.not-verified {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .result-icon {
+            font-size: 32px;
+        }
+
+        .result-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .verified .result-title {
+            color: #155724;
+        }
+
+        .not-verified .result-title {
+            color: #721c24;
+        }
+
+        .result-content {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .verified .result-content {
+            color: #155724;
+        }
+
+        .not-verified .result-content {
+            color: #721c24;
+        }
+
+        .message-display {
+            background: white;
+            padding: 14px;
+            border-radius: 6px;
+            margin-top: 12px;
+            word-break: break-word;
+            border: 1px solid #c3e6cb;
+        }
+
+        .not-verified .message-display {
+            border-color: #f5c6cb;
+        }
+
+        .hash-preview {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 8px;
+            word-break: break-all;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 16px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #0c5460;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #004085;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            .verify-container {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .header .logo {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="verify-container">
+        <div class="header">
+            <div class="logo">🔐</div>
+            <h1>Verify Message Hash</h1>
+            <p>Check if a message hash is verified by PolyGuard merchants</p>
+        </div>
+
+        <div class="verify-form">
+            <div class="form-group">
+                <label for="hashInput">Enter Hash to Verify</label>
+                <textarea 
+                    id="hashInput" 
+                    placeholder="Paste the SHA-256 hash you received (e.g., from SMS or email)&#10;&#10;Example: a3c4f8b2d9e1f6c3a7b5d8e2f9c1a4b7d3e6f2c5a8b1d4e7f3c6a9b2d5e8f1c4"
+                    maxlength="64"
+                ></textarea>
+                <div class="hash-preview" id="hashPreview"></div>
+            </div>
+
+            <button class="verify-btn" id="verifyBtn">
+                <span id="btnText">🔍 Verify Hash</span>
+            </button>
+        </div>
+
+        <div id="resultBox" class="result-box">
+            <div class="result-header">
+                <span class="result-icon" id="resultIcon"></span>
+                <h2 class="result-title" id="resultTitle"></h2>
+            </div>
+            <div class="result-content" id="resultContent"></div>
+        </div>
+
+        <div class="info-box">
+            <strong>ℹ️ How It Works:</strong>
+            Enter the hash you received from a merchant's message (SMS/Email). We'll verify if it matches a registered hash in our secure database, protecting you from spoofing and phishing attempts.
+        </div>
+
+        <a href="/" class="back-link">← Back to Home</a>
+    </div>
+
+    <script>
+        const hashInput = document.getElementById('hashInput');
+        const hashPreview = document.getElementById('hashPreview');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const btnText = document.getElementById('btnText');
+        const resultBox = document.getElementById('resultBox');
+        const resultIcon = document.getElementById('resultIcon');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultContent = document.getElementById('resultContent');
+
+        // Preview hash as user types
+        hashInput.addEventListener('input', () => {
+            const value = hashInput.value.trim();
+            if (value.length > 0) {
+                hashPreview.textContent = `Hash length: ${value.length}/64 characters`;
+            } else {
+                hashPreview.textContent = '';
+            }
+        });
+
+        // Verify hash
+        verifyBtn.addEventListener('click', async () => {
+            const hash = hashInput.value.trim();
+
+            if (!hash) {
+                alert('Please enter a hash to verify');
+                return;
+            }
+
+            if (!/^[0-9a-fA-F]{64}$/.test(hash)) {
+                alert('Invalid hash format. Please enter a valid 64-character SHA-256 hash.');
+                return;
+            }
+
+            // Show loading state
+            verifyBtn.disabled = true;
+            btnText.innerHTML = 'Verifying<span class="spinner"></span>';
+            resultBox.style.display = 'none';
+
+            try {
+                const response = await fetch('/public/verify-hash', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ hash: hash.toLowerCase() })
+                });
+
+                const data = await response.json();
+
+                // Show result
+                resultBox.style.display = 'block';
+
+                if (data.verified) {
+                    // Verified
+                    resultBox.className = 'result-box verified';
+                    resultIcon.textContent = '✅';
+                    resultTitle.textContent = 'Hash Verified!';
+                    resultContent.innerHTML = `
+                        <p><strong>This hash is registered and verified by PolyGuard.</strong></p>
+                        <p>Original Message:</p>
+                        <div class="message-display">${escapeHtml(data.message)}</div>
+                        <p style="margin-top:12px; font-size:13px;">
+                            <strong>Merchant ID:</strong> ${data.merchant_id}<br>
+                            This message was created by a verified PolyGuard merchant and is safe to trust.
+                        </p>
+                    `;
+                } else {
+                    // Not verified
+                    resultBox.className = 'result-box not-verified';
+                    resultIcon.textContent = '❌';
+                    resultTitle.textContent = 'Hash Not Found';
+                    resultContent.innerHTML = `
+                        <p><strong>This hash is NOT registered in PolyGuard's database.</strong></p>
+                        <p>⚠️ Warning: This could be a spoofing or phishing attempt. Do not proceed with any transactions or share sensitive information.</p>
+                        <p style="margin-top:12px; font-size:13px;">
+                            If you believe this is an error, please contact the sender directly through official channels.
+                        </p>
+                    `;
+                }
+            } catch (err) {
+                console.error('Verification error:', err);
+                resultBox.style.display = 'block';
+                resultBox.className = 'result-box not-verified';
+                resultIcon.textContent = '⚠️';
+                resultTitle.textContent = 'Verification Error';
+                resultContent.innerHTML = `
+                    <p>Unable to verify hash due to a connection error.</p>
+                    <p>Please check your internet connection and try again.</p>
+                `;
+            } finally {
+                // Reset button
+                verifyBtn.disabled = false;
+                btnText.innerHTML = '🔍 Verify Hash';
+            }
+        });
+
+        // Allow Enter key to submit
+        hashInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                verifyBtn.click();
+            }
+        });
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+    </script>
+</body>
+</html>

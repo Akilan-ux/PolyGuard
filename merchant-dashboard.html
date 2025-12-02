@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Blockchain - PolyGuard</title>
+    <link rel="stylesheet" href="main.css">
+    <style>
+        * { box-sizing: border-box; }
+        
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: var(--light-gray);
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--dark-gray);
+            color: var(--white);
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-logo h2 {
+            color: var(--white);
+            font-size: 22px;
+            margin: 0;
+        }
+
+        .sidebar-logo p {
+            color: rgba(255,255,255,0.6);
+            font-size: 16px;
+            margin: 4px 0 0;
+            font-weight: 600;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-menu li {
+            margin: 0;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 14px 20px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: rgba(255,255,255,0.1);
+            color: var(--white);
+            border-left-color: var(--accent-blue);
+        }
+
+        .sidebar-menu a.active {
+            background: rgba(64, 128, 255, 0.15);
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 20px;
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 30px;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            color: var(--dark-gray);
+            margin: 0 0 8px;
+        }
+
+        .page-header p {
+            color: var(--medium-gray);
+            margin: 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-approved { background: #d4edda; color: #155724; }
+        .status-approved::before { content: 'Free Tier'; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-rejected { background: #f8d7da; color: #721c24; }
+
+        /* Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            color: var(--medium-gray);
+            margin: 0 0 8px;
+            font-weight: 500;
+        }
+
+        .stat-card .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin: 0;
+        }
+
+        /* Section */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--white);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-size: 20px;
+            margin: 0 0 20px;
+            color: var(--dark-gray);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: var(--dark-gray);
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-gray);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: var(--primary-blue);
+            color: var(--white);
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-primary:hover {
+            background: var(--dark-blue);
+        }
+
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--dark-gray);
+            padding: 10px 20px;
+            border: 1px solid var(--border-gray);
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-gray);
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th {
+            text-align: left;
+            padding: 12px;
+            background: var(--light-gray);
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--dark-gray);
+            border-bottom: 2px solid var(--border-gray);
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-gray);
+            font-size: 14px;
+        }
+
+        table tr:hover {
+            background: var(--light-gray);
+        }
+
+        /* QR Display */
+        .qr-display {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .qr-preview {
+            flex-shrink: 0;
+            padding: 16px;
+            background: var(--white);
+            border: 2px solid var(--border-gray);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .qr-preview img {
+            width: 250px;
+            height: 250px;
+        }
+
+        .qr-info {
+            flex: 1;
+        }
+
+        .hash-display {
+            background: var(--light-gray);
+            padding: 16px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .alert {
+            padding: 14px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .copy-btn {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-blue);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <h2>PolyGuard</h2>
+                <p id="merchantName">Blockchain</p>
+                <span id="merchantStatus" class="status-badge status-pending">Pending</span>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li><a href="#" class="menu-link active" data-section="overview">📊 Overview</a></li>
+                <li><a href="#" class="menu-link" data-section="qr-codes">⛓️ Blockchain</a></li>
+                <li><a href="#" class="menu-link" data-section="hashes">🔐 Hash Generator</a></li>
+                <li><a href="#" class="menu-link" data-section="transactions">📋 Transactions</a></li>
+                <li><a href="#" class="menu-link" data-section="settings">⚙️ Settings</a></li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Overview Section -->
+            <section id="overview" class="section active">
+                <div class="page-header">
+                    <h1>Dashboard Overview</h1>
+                    <p>Welcome back! Here's your account summary.</p>
+                </div>
+
+                <div id="pendingAlert" class="alert alert-warning" style="display:none;">
+                    ⚠️ Your account is pending approval. Some features are limited until approved by an administrator.
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total QR Codes</h3>
+                        <p class="stat-value" id="statQrCodes">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Hashes</h3>
+                        <p class="stat-value" id="statHashes">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>QR Scans</h3>
+                        <p class="stat-value" id="statScans">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Hash Verifications</h3>
+                        <p class="stat-value" id="statVerifications">0</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Recent Activity</h2>
+                    <div class="table-container">
+                        <table id="recentActivityTable">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Details</th>
+                                    <th>Result</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="4" style="text-align:center; color:var(--medium-gray);">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🚀 Quick Deploy QR Code</h2>
+                    <p style="color:var(--medium-gray); margin-bottom:16px;">Deploy a new QR code to blockchain directly from your dashboard</p>
+                    <form id="quickDeployQrForm">
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:12px;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Label *</label>
+                                <input type="text" id="quickQrLabel" placeholder="e.g., Payment QR" required>
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label>Payment Method *</label>
+                                <select id="quickPaymentMethod" required style="width:100%; padding:10px; border:1px solid var(--border-gray); border-radius:8px; font-size:14px;">
+                                    <option value="">Select Method</option>
+                                    <option value="bank">Bank Account</option>
+                                    <option value="paynow">PayNow</option>
+                                    <option value="paylah">PayLah!</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" id="quickBankAccGroup" style="display:none; margin-bottom:12px;">
+                            <label>Bank Account Number *</label>
+                            <input type="text" id="quickBankAccNumber" placeholder="e.g., 1234567890">
+                        </div>
+                        <div class="form-group" id="quickPhoneGroup" style="display:none; margin-bottom:12px;">
+                            <label>Phone Number *</label>
+                            <input type="text" id="quickPhoneNumber" placeholder="e.g., +65 9123 4567">
+                        </div>
+                        <div class="form-group" style="margin-bottom:12px;">
+                            <label>Description</label>
+                            <input type="text" id="quickQrDescription" placeholder="Optional">
+                        </div>
+                        <button type="submit" class="btn-primary">⛓️ Deploy to Blockchain</button>
+                    </form>
+                    <div id="quickDeployResult" style="display:none; margin-top:16px; padding:12px; background:#d4edda; border-radius:6px; color:#155724;">
+                        ✓ <span id="quickDeployMessage">QR Code deployed successfully!</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- QR Codes Section -->
+            <section id="qr-codes" class="section">
+                <div class="page-header">
+                    <h1>Blockchain Deployment</h1>
+                    <p>Deploy verified QR codes to blockchain</p>
+                </div>
+
+                <div class="card">
+                    <h2>Deploy New QR Code</h2>
+                    <form id="createQrForm">
+                        <div class="form-group">
+                            <label>Label *</label>
+                            <input type="text" id="qrLabel" placeholder="e.g., Main Payment QR" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Payment Method *</label>
+                            <select id="paymentMethod" required style="width:100%; padding:12px 14px; border:1px solid var(--border-gray); border-radius:8px; font-size:14px;">
+                                <option value="">Select Payment Method</option>
+                                <option value="bank">Bank Account</option>
+                                <option value="paynow">PayNow</option>
+                                <option value="paylah">PayLah!</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="bankAccGroup" style="display:none;">
+                            <label>Bank Account Number *</label>
+                            <input type="text" id="bankAccNumber" placeholder="e.g., 1234567890">
+                        </div>
+                        <div class="form-group" id="phoneGroup" style="display:none;">
+                            <label>Phone Number *</label>
+                            <input type="text" id="phoneNumber" placeholder="e.g., +65 9123 4567">
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="qrDescription" placeholder="Optional description"></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary">Generate QR Code</button>
+                    </form>
+                </div>
+
+                <div id="qrResultCard" class="card" style="display:none;">
+                    <h2>Generated QR Code</h2>
+                    <div class="qr-display">
+                        <div class="qr-preview">
+                            <div id="qrImageContainer"></div>
+                            <button class="btn-secondary" id="downloadQrBtn" style="margin-top:10px;">Download SVG</button>
+                        </div>
+                        <div class="qr-info">
+                            <p><strong>Label:</strong> <span id="qrLabelDisplay"></span></p>
+                            <p><strong>URL:</strong></p>
+                            <div class="hash-display" id="qrUrlDisplay"></div>
+                            <button class="copy-btn" onclick="copyToClipboard('qrUrlDisplay')">Copy URL</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Deployed QR Codes</h2>
+                    <div class="table-container">
+                        <table id="qrListTable">
+                            <thead>
+                                <tr>
+                                    <th>Label</th>
+                                    <th>URL</th>
+                                    <th>Scans</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="5" style="text-align:center; color:var(--medium-gray);">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Hashes Section -->
+            <section id="hashes" class="section">
+                <div class="page-header">
+                    <h1>Hash Generator</h1>
+                    <p>Create SHA-256 hashes for SMS authentication</p>
+                </div>
+
+                <div class="card">
+                    <h2>Generate New Hash</h2>
+                    <form id="createHashForm">
+                        <div class="form-group">
+                            <label>Message *</label>
+                            <textarea id="hashMessage" placeholder="Enter the message you want to hash" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Purpose</label>
+                            <input type="text" id="hashPurpose" placeholder="e.g., Account verification SMS">
+                        </div>
+                        <button type="submit" class="btn-primary">Generate Hash</button>
+                    </form>
+                </div>
+
+                <div id="hashResultCard" class="card" style="display:none;">
+                    <h2>Generated Hash</h2>
+                    <p><strong>Original Message:</strong></p>
+                    <div class="hash-display" id="hashMessageDisplay"></div>
+                    <p><strong>SHA-256 Hash:</strong></p>
+                    <div class="hash-display" id="hashValueDisplay"></div>
+                    <button class="copy-btn" onclick="copyToClipboard('hashValueDisplay')">Copy Hash</button>
+                    <div class="alert alert-info" style="margin-top:16px;">
+                        ℹ️ Include this hash in your message. Customers can verify it at: <br>
+                        <strong>https://polyguard.netlify.app/verify-hash</strong>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>My Hashes</h2>
+                    <div class="table-container">
+                        <table id="hashListTable">
+                            <thead>
+                                <tr>
+                                    <th>Message</th>
+                                    <th>Hash</th>
+                                    <th>Purpose</th>
+                                    <th>Verifications</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="5" style="text-align:center; color:var(--medium-gray);">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Transactions Section -->
+            <section id="transactions" class="section">
+                <div class="page-header">
+                    <h1>Transaction Logs</h1>
+                    <p>View all authentication and verification activities</p>
+                </div>
+
+                <div class="card">
+                    <h2>Recent Transactions</h2>
+                    <div class="table-container">
+                        <table id="transactionTable">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Hash/Details</th>
+                                    <th>IP Address</th>
+                                    <th>Result</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="5" style="text-align:center; color:var(--medium-gray);">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings" class="section">
+                <div class="page-header">
+                    <h1>Account Settings</h1>
+                    <p>Manage your blockchain account</p>
+                </div>
+
+                <div class="card">
+                    <h2>Company Information</h2>
+                    <div id="companyInfo"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Global state
+        let authToken = localStorage.getItem('polyguard_token');
+        let merchantData = JSON.parse(localStorage.getItem('polyguard_merchant') || '{}');
+
+        // Check authentication
+        if (!authToken) {
+            window.location.href = '/demo.html';
+        }
+
+        // API helper
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            const options = {
+                method,
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+
+            const response = await fetch(endpoint, options);
+            
+            if (response.status === 401 || response.status === 403) {
+                localStorage.removeItem('polyguard_token');
+                localStorage.removeItem('polyguard_merchant');
+                window.location.href = '/demo.html';
+                return;
+            }
+
+            return await response.json();
+        }
+
+        // Initialize dashboard
+        async function initDashboard() {
+            // Set merchant info
+            document.getElementById('merchantName').textContent = merchantData.company_name || merchantData.user_name;
+            
+            const statusBadge = document.getElementById('merchantStatus');
+            // Remove text content since CSS handles it
+            statusBadge.textContent = '';
+            statusBadge.className = `status-badge status-${merchantData.status || 'pending'}`;
+
+            if (merchantData.status === 'pending') {
+                document.getElementById('pendingAlert').style.display = 'block';
+            }
+
+            // Load data
+            await loadDashboardStats();
+            await loadQrCodes();
+            await loadHashes();
+            await loadTransactions();
+        }
+
+        // Load dashboard statistics
+        async function loadDashboardStats() {
+            try {
+                const [qrData, hashData, transData] = await Promise.all([
+                    apiCall('/merchants/list-qr'),
+                    apiCall('/merchants/list-hashes'),
+                    apiCall('/merchants/recent-transactions?limit=10')
+                ]);
+
+                if (qrData.success) {
+                    const qrCodes = qrData.qr_codes;
+                    document.getElementById('statQrCodes').textContent = qrCodes.length;
+                    const totalScans = qrCodes.reduce((sum, qr) => sum + (qr.scan_count || 0), 0);
+                    document.getElementById('statScans').textContent = totalScans;
+                }
+
+                if (hashData.success) {
+                    const hashes = hashData.hashes;
+                    document.getElementById('statHashes').textContent = hashes.length;
+                    const totalVerifications = hashes.reduce((sum, h) => sum + (h.verification_count || 0), 0);
+                    document.getElementById('statVerifications').textContent = totalVerifications;
+                }
+
+                if (transData.success) {
+                    const tbody = document.querySelector('#recentActivityTable tbody');
+                    if (transData.transactions.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--medium-gray);">No recent activity</td></tr>';
+                    } else {
+                        tbody.innerHTML = transData.transactions.slice(0, 5).map(t => `
+                            <tr>
+                                <td>${formatTransactionType(t.transaction_type)}</td>
+                                <td>${t.result_message || '-'}</td>
+                                <td><span class="status-badge status-${t.verification_result || 'pending'}">${t.verification_result || 'N/A'}</span></td>
+                                <td>${formatDate(t.created_at)}</td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch (err) {
+                console.error('Error loading stats:', err);
+            }
+        }
+
+        // Load QR codes
+        async function loadQrCodes() {
+            try {
+                const data = await apiCall('/merchants/list-qr');
+                const tbody = document.querySelector('#qrListTable tbody');
+
+                if (data.success && data.qr_codes.length > 0) {
+                    tbody.innerHTML = data.qr_codes.map(qr => `
+                        <tr>
+                            <td>${qr.label}</td>
+                            <td><code style="font-size:11px;">${qr.qr_url}</code></td>
+                            <td>${qr.scan_count || 0}</td>
+                            <td>${formatDate(qr.created_at)}</td>
+                            <td>
+                                <button class="btn-secondary" onclick="viewQr(${qr.id})">View</button>
+                                <button class="btn-secondary" onclick="regenerateQr(${qr.id})">Regenerate</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--medium-gray);">No QR codes created yet</td></tr>';
+                }
+            } catch (err) {
+                console.error('Error loading QR codes:', err);
+            }
+        }
+
+        // Load hashes
+        async function loadHashes() {
+            try {
+                const data = await apiCall('/merchants/list-hashes');
+                const tbody = document.querySelector('#hashListTable tbody');
+
+                if (data.success && data.hashes.length > 0) {
+                    tbody.innerHTML = data.hashes.map(h => `
+                        <tr>
+                            <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis;">${h.original_message.substring(0, 50)}...</td>
+                            <td><code style="font-size:11px;">${h.message_hash.substring(0, 16)}...</code></td>
+                            <td>${h.purpose || '-'}</td>
+                            <td>${h.verification_count || 0}</td>
+                            <td>${formatDate(h.created_at)}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--medium-gray);">No hashes created yet</td></tr>';
+                }
+            } catch (err) {
+                console.error('Error loading hashes:', err);
+            }
+        }
+
+        // Load transactions
+        async function loadTransactions() {
+            try {
+                const data = await apiCall('/merchants/recent-transactions?limit=50');
+                const tbody = document.querySelector('#transactionTable tbody');
+
+                if (data.success && data.transactions.length > 0) {
+                    tbody.innerHTML = data.transactions.map(t => `
+                        <tr>
+                            <td>${formatTransactionType(t.transaction_type)}</td>
+                            <td>${t.scanned_hash ? `<code style="font-size:11px;">${t.scanned_hash.substring(0, 16)}...</code>` : '-'}</td>
+                            <td>${t.ip_address || '-'}</td>
+                            <td><span class="status-badge status-${t.verification_result || 'pending'}">${t.verification_result || 'N/A'}</span></td>
+                            <td>${formatDate(t.created_at)}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--medium-gray);">No transactions yet</td></tr>';
+                }
+            } catch (err) {
+                console.error('Error loading transactions:', err);
+            }
+        }
+
+        // Payment method dropdown handlers
+        document.getElementById('paymentMethod').addEventListener('change', function() {
+            const value = this.value;
+            const bankAccGroup = document.getElementById('bankAccGroup');
+            const phoneGroup = document.getElementById('phoneGroup');
+            const bankAccInput = document.getElementById('bankAccNumber');
+            const phoneInput = document.getElementById('phoneNumber');
+
+            if (value === 'bank') {
+                bankAccGroup.style.display = 'block';
+                phoneGroup.style.display = 'none';
+                bankAccInput.required = true;
+                phoneInput.required = false;
+            } else if (value === 'paynow' || value === 'paylah') {
+                bankAccGroup.style.display = 'none';
+                phoneGroup.style.display = 'block';
+                bankAccInput.required = false;
+                phoneInput.required = true;
+            } else {
+                bankAccGroup.style.display = 'none';
+                phoneGroup.style.display = 'none';
+                bankAccInput.required = false;
+                phoneInput.required = false;
+            }
+        });
+
+        document.getElementById('quickPaymentMethod').addEventListener('change', function() {
+            const value = this.value;
+            const bankAccGroup = document.getElementById('quickBankAccGroup');
+            const phoneGroup = document.getElementById('quickPhoneGroup');
+            const bankAccInput = document.getElementById('quickBankAccNumber');
+            const phoneInput = document.getElementById('quickPhoneNumber');
+
+            if (value === 'bank') {
+                bankAccGroup.style.display = 'block';
+                phoneGroup.style.display = 'none';
+                bankAccInput.required = true;
+                phoneInput.required = false;
+            } else if (value === 'paynow' || value === 'paylah') {
+                bankAccGroup.style.display = 'none';
+                phoneGroup.style.display = 'block';
+                bankAccInput.required = false;
+                phoneInput.required = true;
+            } else {
+                bankAccGroup.style.display = 'none';
+                phoneGroup.style.display = 'none';
+                bankAccInput.required = false;
+                phoneInput.required = false;
+            }
+        });
+
+        // Create QR code
+        document.getElementById('createQrForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const label = document.getElementById('qrLabel').value;
+            const description = document.getElementById('qrDescription').value;
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const bankAccNumber = document.getElementById('bankAccNumber').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+
+            let paymentMethodText = '';
+            let paymentDetails = '';
+            
+            if (paymentMethod === 'bank') {
+                paymentMethodText = 'Bank Account';
+                paymentDetails = bankAccNumber;
+            } else if (paymentMethod === 'paynow') {
+                paymentMethodText = 'PayNow';
+                paymentDetails = phoneNumber;
+            } else if (paymentMethod === 'paylah') {
+                paymentMethodText = 'PayLah!';
+                paymentDetails = phoneNumber;
+            }
+
+            try {
+                const data = await apiCall('/merchants/create-qr', 'POST', { 
+                    label, 
+                    description: description || '',
+                    payment_method: paymentMethodText,
+                    payment_details: paymentDetails
+                });
+
+                if (data.success) {
+                    // Display QR code
+                    document.getElementById('qrImageContainer').innerHTML = data.qr_code.svg;
+                    document.getElementById('qrLabelDisplay').textContent = data.qr_code.label;
+                    document.getElementById('qrUrlDisplay').textContent = data.qr_code.url;
+                    document.getElementById('qrResultCard').style.display = 'block';
+
+                    // Reset form
+                    document.getElementById('createQrForm').reset();
+                    document.getElementById('bankAccGroup').style.display = 'none';
+                    document.getElementById('phoneGroup').style.display = 'none';
+
+                    // Reload QR list
+                    await loadQrCodes();
+                    await loadDashboardStats();
+
+                    alert('QR Code created successfully!');
+                } else {
+                    alert('Failed to create QR code: ' + (data.error || 'Unknown error'));
+                }
+            } catch (err) {
+                console.error('QR creation error:', err);
+                alert('Error creating QR code');
+            }
+        });
+
+        // Create hash
+        document.getElementById('createHashForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const message = document.getElementById('hashMessage').value;
+            const purpose = document.getElementById('hashPurpose').value;
+
+            try {
+                const data = await apiCall('/merchants/create-hash', 'POST', { message, purpose });
+
+                if (data.success) {
+                    // Display hash
+                    document.getElementById('hashMessageDisplay').textContent = data.hash.original_message;
+                    document.getElementById('hashValueDisplay').textContent = data.hash.message_hash;
+                    document.getElementById('hashResultCard').style.display = 'block';
+
+                    // Reset form
+                    document.getElementById('createHashForm').reset();
+
+                    // Reload hash list
+                    await loadHashes();
+                    await loadDashboardStats();
+
+                    alert('Hash created successfully!');
+                } else {
+                    alert('Failed to create hash: ' + (data.error || 'Unknown error'));
+                }
+            } catch (err) {
+                console.error('Hash creation error:', err);
+                alert('Error creating hash');
+            }
+        });
+
+        // Quick Deploy QR from Overview
+        document.getElementById('quickDeployQrForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const label = document.getElementById('quickQrLabel').value;
+            const description = document.getElementById('quickQrDescription').value;
+            const paymentMethod = document.getElementById('quickPaymentMethod').value;
+            const bankAccNumber = document.getElementById('quickBankAccNumber').value;
+            const phoneNumber = document.getElementById('quickPhoneNumber').value;
+
+            let paymentMethodText = '';
+            let paymentDetails = '';
+            
+            if (paymentMethod === 'bank') {
+                paymentMethodText = 'Bank Account';
+                paymentDetails = bankAccNumber;
+            } else if (paymentMethod === 'paynow') {
+                paymentMethodText = 'PayNow';
+                paymentDetails = phoneNumber;
+            } else if (paymentMethod === 'paylah') {
+                paymentMethodText = 'PayLah!';
+                paymentDetails = phoneNumber;
+            }
+
+            try {
+                const data = await apiCall('/merchants/create-qr', 'POST', { 
+                    label, 
+                    description: description || '',
+                    payment_method: paymentMethodText,
+                    payment_details: paymentDetails
+                });
+
+                if (data.success) {
+                    // Show success message
+                    document.getElementById('quickDeployMessage').textContent = 
+                        `QR Code "${data.qr_code.label}" deployed successfully!`;
+                    document.getElementById('quickDeployResult').style.display = 'block';
+
+                    // Reset form
+                    document.getElementById('quickDeployQrForm').reset();
+                    document.getElementById('quickBankAccGroup').style.display = 'none';
+                    document.getElementById('quickPhoneGroup').style.display = 'none';
+
+                    // Reload stats
+                    await loadDashboardStats();
+
+                    // Hide success after 5 seconds
+                    setTimeout(() => {
+                        document.getElementById('quickDeployResult').style.display = 'none';
+                    }, 5000);
+                } else {
+                    alert('Failed to deploy QR code: ' + (data.error || 'Unknown error'));
+                }
+            } catch (err) {
+                console.error('Quick deploy error:', err);
+                alert('Error deploying QR code');
+            }
+        });
+
+        // Sidebar navigation
+        document.querySelectorAll('.menu-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = e.target.dataset.section;
+
+                // Update active menu
+                document.querySelectorAll('.menu-link').forEach(l => l.classList.remove('active'));
+                e.target.classList.add('active');
+
+                // Show section
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById(section).classList.add('active');
+            });
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('polyguard_token');
+            localStorage.removeItem('polyguard_merchant');
+            window.location.href = '/demo.html';
+        });
+
+        // Utility functions
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleString();
+        }
+
+        function formatTransactionType(type) {
+            const types = {
+                'qr_scan': '📱 QR Scan',
+                'hash_verification': '🔐 Hash Verify',
+                'qr_creation': '➕ QR Created',
+                'hash_creation': '➕ Hash Created'
+            };
+            return types[type] || type;
+        }
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            });
+        }
+
+        function viewQr(id) {
+            window.open(`/merchants/qr/${id}`, '_blank');
+        }
+
+        async function regenerateQr(id) {
+            if (!confirm('Regenerate this QR code?')) return;
+
+            try {
+                const data = await apiCall(`/merchants/regenerate-qr/${id}`, 'POST');
+                if (data.success) {
+                    alert('QR code regenerated!');
+                    await loadQrCodes();
+                }
+            } catch (err) {
+                alert('Failed to regenerate QR code');
+            }
+        }
+
+        // Initialize on load
+        initDashboard();
+    </script>
+</body>
+</html>

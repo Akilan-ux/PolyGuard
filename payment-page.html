@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pay & Transfer - PolyGuard Verified</title>
+    <link rel="stylesheet" href="main.css">
+    <style>
+        * { box-sizing: border-box; }
+        
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .payment-container {
+            max-width: 480px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .payment-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px 24px;
+            text-align: center;
+            color: white;
+        }
+
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .verified-icon {
+            width: 20px;
+            height: 20px;
+            background: #28a745;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        .company-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 8px;
+        }
+
+        .company-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .payment-body {
+            padding: 32px 24px;
+        }
+
+        .payment-method-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .payment-details {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .payment-type {
+            font-size: 14px;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .payment-type-icon {
+            font-size: 20px;
+        }
+
+        .account-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .account-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+            letter-spacing: 1px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+
+        .amount-section {
+            margin-bottom: 24px;
+        }
+
+        .amount-label {
+            font-size: 14px;
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .amount-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .currency-symbol {
+            position: absolute;
+            left: 16px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #6c757d;
+        }
+
+        .amount-input {
+            width: 100%;
+            padding: 16px 16px 16px 48px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+            transition: border-color 0.3s;
+        }
+
+        .amount-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .quick-amounts {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .quick-amount-btn {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-amount-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .transfer-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .transfer-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .transfer-btn:active {
+            transform: translateY(0);
+        }
+
+        .transfer-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .polyguard-footer {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .backed-by {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
+
+        .polyguard-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .shield-icon {
+            font-size: 24px;
+        }
+
+        .security-note {
+            font-size: 11px;
+            color: #6c757d;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        .info-card {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        .info-card strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        @media (max-width: 480px) {
+            .payment-container {
+                border-radius: 0;
+                min-height: 100vh;
+            }
+
+            .account-number {
+                font-size: 20px;
+            }
+
+            .amount-input {
+                font-size: 24px;
+            }
+        }
+
+        .success-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.8);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success-overlay.show {
+            display: flex;
+        }
+
+        .success-card {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 400px;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .success-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #28a745;
+            margin-bottom: 12px;
+        }
+
+        .success-message {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 24px;
+        }
+
+        .done-btn {
+            padding: 12px 32px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="payment-container">
+        <div class="payment-header">
+            <div class="verified-badge">
+                <div class="verified-icon">✓</div>
+                PolyGuard Verified Merchant
+            </div>
+            <h1 class="company-name" id="companyName">Loading...</h1>
+            <p class="company-subtitle">Secure Payment Transfer</p>
+        </div>
+
+        <div class="payment-body">
+            <div class="info-card">
+                <strong>⚠️ Important:</strong>
+                Please verify the account details match your transaction before transferring.
+            </div>
+
+            <div class="payment-method-label">Transfer To</div>
+            <div class="payment-details">
+                <div class="payment-type">
+                    <span class="payment-type-icon" id="paymentIcon">🏦</span>
+                    <span id="paymentType">Bank Transfer</span>
+                </div>
+                <div class="account-info">
+                    <div class="account-number" id="accountNumber">••••••••••</div>
+                    <button class="copy-btn" id="copyBtn">📋 Copy</button>
+                </div>
+            </div>
+
+            <div class="amount-section">
+                <div class="amount-label">Enter Amount</div>
+                <div class="amount-input-wrapper">
+                    <span class="currency-symbol">$</span>
+                    <input 
+                        type="number" 
+                        class="amount-input" 
+                        id="amountInput" 
+                        placeholder="0.00"
+                        min="0"
+                        step="0.01"
+                    >
+                </div>
+                <div class="quick-amounts">
+                    <button class="quick-amount-btn" onclick="setAmount(10)">$10</button>
+                    <button class="quick-amount-btn" onclick="setAmount(50)">$50</button>
+                    <button class="quick-amount-btn" onclick="setAmount(100)">$100</button>
+                </div>
+            </div>
+
+            <button class="transfer-btn" id="transferBtn">
+                🚀 Proceed to Transfer
+            </button>
+
+            <div class="polyguard-footer">
+                <div class="backed-by">Backed By</div>
+                <div class="polyguard-logo">
+                    <span class="shield-icon">🛡️</span>
+                    <span>PolyGuard</span>
+                </div>
+                <div class="security-note">
+                    This merchant is verified and protected by PolyGuard's blockchain security system
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="success-overlay" id="successOverlay">
+        <div class="success-card">
+            <div class="success-icon">✅</div>
+            <h2 class="success-title">Transfer Initiated!</h2>
+            <p class="success-message">
+                Please complete the payment in your banking app. The merchant will be notified once the transaction is confirmed.
+            </p>
+            <button class="done-btn" onclick="closeSuccess()">Done</button>
+        </div>
+    </div>
+
+    <script>
+        // Extract company slug from URL (e.g., /company-name.html)
+        const urlPath = window.location.pathname;
+        const companySlug = urlPath.split('/').pop().replace('.html', '');
+
+        let merchantData = null;
+
+        // Load payment info from API
+        async function loadPaymentInfo() {
+            try {
+                const response = await fetch(`http://localhost:3000/public/merchant-data/${companySlug}`);
+                
+                if (!response.ok) {
+                    throw new Error('Merchant not found');
+                }
+                
+                merchantData = await response.json();
+
+                // Set company name
+                document.getElementById('companyName').textContent = merchantData.company_name;
+
+                // Set payment details based on method
+                const paymentMethod = merchantData.payment_method;
+                const paymentDetails = merchantData.payment_details;
+
+                if (paymentMethod === 'Bank Account') {
+                    document.getElementById('paymentIcon').textContent = '🏦';
+                    document.getElementById('paymentType').textContent = 'Bank Transfer';
+                    document.getElementById('accountNumber').textContent = paymentDetails;
+                } else if (paymentMethod === 'PayNow') {
+                    document.getElementById('paymentIcon').textContent = '📱';
+                    document.getElementById('paymentType').textContent = 'PayNow';
+                    document.getElementById('accountNumber').textContent = paymentDetails;
+                } else if (paymentMethod === 'PayLah!') {
+                    document.getElementById('paymentIcon').textContent = '💳';
+                    document.getElementById('paymentType').textContent = 'PayLah!';
+                    document.getElementById('accountNumber').textContent = paymentDetails;
+                }
+
+                // Log QR scan
+                await fetch('http://localhost:3000/public/log-qr-scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ qr_url: window.location.href })
+                });
+
+            } catch (error) {
+                console.error('Error loading merchant data:', error);
+                document.getElementById('companyName').textContent = 'Merchant Not Found';
+                document.getElementById('paymentType').textContent = 'Error Loading Payment Info';
+                document.getElementById('accountNumber').textContent = 'Please contact support';
+            }
+        }
+
+        // Set quick amount
+        function setAmount(value) {
+            document.getElementById('amountInput').value = value;
+        }
+
+        // Copy account number
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            const accountNumber = document.getElementById('accountNumber').textContent;
+            navigator.clipboard.writeText(accountNumber).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                btn.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#667eea';
+                }, 2000);
+            });
+        });
+
+        // Transfer button
+        document.getElementById('transferBtn').addEventListener('click', () => {
+            const amount = document.getElementById('amountInput').value;
+            
+            if (!amount || parseFloat(amount) <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+
+            // Log QR scan to backend
+            fetch('/public/log-qr-scan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    qr_url: window.location.href,
+                    amount: parseFloat(amount),
+                    company_slug: companySlug
+                })
+            }).catch(err => console.error('Log error:', err));
+
+            // Show success overlay
+            document.getElementById('successOverlay').classList.add('show');
+        });
+
+        // Close success overlay
+        function closeSuccess() {
+            document.getElementById('successOverlay').classList.remove('show');
+            document.getElementById('amountInput').value = '';
+        }
+
+        // Load data on page load
+        loadPaymentInfo();
+    </script>
+</body>
+</html>
