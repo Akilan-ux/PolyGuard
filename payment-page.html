@@ -446,9 +446,9 @@
     </div>
 
     <script>
-        // Extract company slug from URL (e.g., /company-name.html)
-        const urlPath = window.location.pathname;
-        const companySlug = urlPath.split('/').pop().replace('.html', '');
+        // Extract company slug from URL query parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const companySlug = urlParams.get('company');
 
         let merchantData = null;
 

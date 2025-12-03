@@ -267,7 +267,7 @@ app.post('/merchants/create-qr', authenticateToken, requireApprovedMerchant, asy
     const companyName = merchantResult.rows[0].company_name;
     const companySlug = companyName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
-    const qrUrl = `https://polyguard.netlify.app/${companySlug}.html`;
+    const qrUrl = `https://polyguard.netlify.app/payment-page.html?company=${companySlug}`;
 
     const qrSvg = await QRCode.toString(qrUrl, {
       type: 'svg',
