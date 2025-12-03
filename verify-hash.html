@@ -41,8 +41,10 @@
         }
 
         .header .logo {
-            font-size: 48px;
-            margin-bottom: 10px;
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            color: #667eea;
         }
 
         .header p {
@@ -149,7 +151,24 @@
         }
 
         .result-icon {
-            font-size: 32px;
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .verified .result-icon svg {
+            color: #28a745;
+        }
+
+        .not-verified .result-icon svg {
+            color: #dc3545;
         }
 
         .result-title {
@@ -262,7 +281,10 @@
 <body>
     <div class="verify-container">
         <div class="header">
-            <div class="logo">🔐</div>
+            <svg class="logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <path d="M9 12l2 2 4-4"/>
+            </svg>
             <h1>Verify Message Hash</h1>
             <p>Check if a message hash is verified by PolyGuard merchants</p>
         </div>
@@ -279,7 +301,7 @@
             </div>
 
             <button class="verify-btn" id="verifyBtn">
-                <span id="btnText">🔍 Verify Hash</span>
+                <span id="btnText">Verify Hash</span>
             </button>
         </div>
 
@@ -292,7 +314,7 @@
         </div>
 
         <div class="info-box">
-            <strong>ℹ️ How It Works:</strong>
+            <strong>How It Works:</strong>
             Enter the hash you received from a merchant's message (SMS/Email). We'll verify if it matches a registered hash in our secure database, protecting you from spoofing and phishing attempts.
         </div>
 
@@ -355,8 +377,8 @@
                 if (data.verified) {
                     // Verified
                     resultBox.className = 'result-box verified';
-                    resultIcon.textContent = '✅';
-                    resultTitle.textContent = 'Hash Verified!';
+                    resultIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>';
+                    resultTitle.textContent = 'Hash Verified';
                     resultContent.innerHTML = `
                         <p><strong>This hash is registered and verified by PolyGuard.</strong></p>
                         <p>Original Message:</p>
@@ -369,11 +391,11 @@
                 } else {
                     // Not verified
                     resultBox.className = 'result-box not-verified';
-                    resultIcon.textContent = '❌';
+                    resultIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6"/><path d="M9 9l6 6"/></svg>';
                     resultTitle.textContent = 'Hash Not Found';
                     resultContent.innerHTML = `
                         <p><strong>This hash is NOT registered in PolyGuard's database.</strong></p>
-                        <p>⚠️ Warning: This could be a spoofing or phishing attempt. Do not proceed with any transactions or share sensitive information.</p>
+                        <p><strong>Warning:</strong> This could be a spoofing or phishing attempt. Do not proceed with any transactions or share sensitive information.</p>
                         <p style="margin-top:12px; font-size:13px;">
                             If you believe this is an error, please contact the sender directly through official channels.
                         </p>
@@ -383,7 +405,7 @@
                 console.error('Verification error:', err);
                 resultBox.style.display = 'block';
                 resultBox.className = 'result-box not-verified';
-                resultIcon.textContent = '⚠️';
+                resultIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
                 resultTitle.textContent = 'Verification Error';
                 resultContent.innerHTML = `
                     <p>Unable to verify hash due to a connection error.</p>
@@ -392,7 +414,7 @@
             } finally {
                 // Reset button
                 verifyBtn.disabled = false;
-                btnText.innerHTML = '🔍 Verify Hash';
+                btnText.textContent = 'Verify Hash';
             }
         });
 
